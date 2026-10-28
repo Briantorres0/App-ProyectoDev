@@ -9,8 +9,93 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Estilos integrados para Login y Vista Previa de Facturas Emitidas */
+        .auth-screen {
+            position: fixed;
+            inset: 0;
+            background-color: var(--bg-main);
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .auth-screen.active { display: flex; }
+        .auth-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--shadow-soft);
+            text-align: center;
+        }
+        .auth-header { margin-bottom: 22px; }
+        .auth-header .brand-logo { margin: 0 auto 12px; width: 48px; height: 48px; }
+        .auth-header h2 { font-family: var(--font-serif); font-size: 1.45rem; margin-bottom: 6px; }
+        .auth-header p { font-size: 0.85rem; color: var(--text-secondary); }
+        .billing-summary-box {
+            background-color: var(--bg-main);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            margin: 14px 0 18px;
+        }
+        .billing-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+        .billing-row.total {
+            font-size: 1.12rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 8px;
+            margin-top: 8px;
+            margin-bottom: 0;
+        }
+        .badge-fact-type {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background-color: var(--text-primary);
+            color: #fff;
+            font-family: var(--font-serif);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+    </style>
 </head>
 <body>
+
+    <!-- ==================== PANTALLA DE ACCESO / LOGIN (DUEÑO) ==================== -->
+    <div id="auth-screen" class="auth-screen">
+        <div class="auth-card">
+            <div class="auth-header">
+                <svg class="brand-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="40" height="40" rx="10" fill="#6E7E6F" fill-opacity="0.14"/>
+                    <path d="M14 15L9 20L14 25" stroke="#6E7E6F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M26 15L31 20L26 25" stroke="#6E7E6F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M22 12C17.5 15.5 16.5 22 20 28C23.5 22 22.5 15.5 22 12Z" fill="#6E7E6F"/>
+                </svg>
+                <h2>Acceso Administrativo</h2>
+                <p>Ingresá la clave de tu comercio para entrar al Menú Administración.</p>
+            </div>
+            <form id="form-login" style="text-align: left;">
+                <div class="form-group">
+                    <label>Contraseña del Local</label>
+                    <input type="password" id="login-pass" required placeholder="•••••••• (Demo: admin123)">
+                </div>
+                <button type="submit" class="btn-primary full-width">Ingresar al Panel</button>
+            </form>
+            <button id="btn-back-to-shop" class="btn-outline full-width" style="margin-top: 10px;">← Volver al Catálogo</button>
+        </div>
+    </div>
 
     <!-- Barra Superior de Navegación -->
     <header class="navbar">
@@ -29,7 +114,7 @@
                 </div>
             </a>
 
-            <!-- Selector de Modo (Se oculta automáticamente si el link es ?modo=tienda para el cliente final) -->
+            <!-- Selector de Modo (Se oculta automáticamente si el link es ?modo=tienda) -->
             <div class="mode-switcher" id="mode-switcher">
                 <button id="btn-view-catalog" class="mode-btn active">
                     Vista Cliente
@@ -53,7 +138,6 @@
         
         <!-- ==================== VISTA 1: CATÁLOGO CLIENTE ==================== -->
         <section id="catalog-view" class="view-section active">
-            <!-- Controles: Buscador y Filtros del Cliente -->
             <div class="toolbar">
                 <div class="search-wrapper">
                     <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -90,10 +174,13 @@
                         🔗 Abrir Página Cliente
                     </button>
                     <button id="btn-open-pos" class="btn-outline">
-                        ⚡ Registrar Venta Rápida
+                        ⚡ Venta Rápida
                     </button>
                     <button id="btn-open-modal" class="btn-primary">
                         + Nuevo Producto
+                    </button>
+                    <button id="btn-logout-admin" class="btn-outline" title="Bloquear panel">
+                        🔒 Salir
                     </button>
                 </div>
             </div>
@@ -101,9 +188,10 @@
             <!-- Navegación Interna del Menú Administración -->
             <div class="admin-tabs">
                 <button class="admin-tab active" data-tab="tab-dashboard">📊 Resumen & Gráficos</button>
-                <button class="admin-tab" data-tab="tab-inventory">📦 Stock & Precios Masivos</button>
+                <button class="admin-tab" data-tab="tab-inventory">📦 Stock & Precios</button>
+                <button class="admin-tab" data-tab="tab-billing">📄 Facturador AFIP (A/B/C)</button>
                 <button class="admin-tab" data-tab="tab-sales">💰 Ventas & Caja</button>
-                <button class="admin-tab" data-tab="tab-invoices">🧾 Facturas & Gastos</button>
+                <button class="admin-tab" data-tab="tab-invoices">🧾 Gastos & Proveedores</button>
                 <button class="admin-tab" data-tab="tab-sync">🌐 Enlace Cliente & Config</button>
             </div>
 
@@ -123,7 +211,7 @@
                     <div class="kpi-card">
                         <span class="kpi-label">Ganancia Neta Estimada</span>
                         <strong class="kpi-value" id="kpi-net-profit">$0</strong>
-                        <small class="kpi-sub">Descontando costo y facturas</small>
+                        <small class="kpi-sub">Descontando costo y gastos</small>
                     </div>
                     <div class="kpi-card warning">
                         <span class="kpi-label">Alertas de Reposición</span>
@@ -132,13 +220,13 @@
                     </div>
                 </div>
 
-                <!-- Gráficos Visuales (Estilo idéntico al celular de la placa) -->
+                <!-- Gráficos Visuales -->
                 <div class="charts-grid">
                     <div class="chart-card">
                         <div class="chart-header">
                             <div>
                                 <h3>Evolución de Ingresos (Últimos 7 días)</h3>
-                                <p>Facturación diaria por WhatsApp y Mostrador</p>
+                                <p>Facturación diaria por WhatsApp, Mostrador y Facturas AFIP</p>
                             </div>
                             <span class="chart-pill">Tiempo Real</span>
                         </div>
@@ -200,7 +288,6 @@
 
             <!-- SUB-PESTAÑA 2: INVENTARIO + AUTOMATIZACIÓN DE PRECIOS -->
             <div id="tab-inventory" class="admin-tab-content">
-                <!-- Automatización de Precios por Inflación -->
                 <div class="bulk-tool-card">
                     <div class="bulk-info">
                         <h4>⚡ Actualizador Masivo de Precios</h4>
@@ -249,13 +336,117 @@
                 </div>
             </div>
 
-            <!-- SUB-PESTAÑA 3: HISTORIAL DE VENTAS Y CAJA -->
+            <!-- SUB-PESTAÑA 3: FACTURADOR ELECTRÓNICO AFIP (FACTURAS A, B y C) -->
+            <div id="tab-billing" class="admin-tab-content">
+                <div class="invoices-layout">
+                    <!-- Formulario Emisor -->
+                    <div class="invoice-form-card">
+                        <h3>📄 Emitir Factura de Venta</h3>
+                        <p class="sub-text">Generá comprobantes A (con IVA 21% discriminado), B o C. Descuenta stock y suma a caja.</p>
+                        
+                        <form id="form-create-factura">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Tipo de Factura</label>
+                                    <select id="fact-type" required>
+                                        <option value="A">Factura A (Resp. Inscripto)</option>
+                                        <option value="B">Factura B (Cons. Final / Exento)</option>
+                                        <option value="C">Factura C (Monotributo)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Próximo Nro.</label>
+                                    <input type="text" id="fact-next-num" value="0001-00000105" readonly style="background:var(--bg-main); font-weight:600;">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Razón Social o Nombre del Cliente</label>
+                                <input type="text" id="fact-client-name" required placeholder="Ej: Constructora Tandil S.R.L.">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>CUIT / DNI</label>
+                                    <input type="text" id="fact-client-doc" required placeholder="30-71548921-9">
+                                </div>
+                                <div class="form-group">
+                                    <label>Condición Pago</label>
+                                    <select id="fact-payment">
+                                        <option value="Transferencia / Cta. Cte.">Transferencia / Cta. Cte.</option>
+                                        <option value="Efectivo">Efectivo</option>
+                                        <option value="Tarjeta / QR">Tarjeta / QR</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Producto a Facturar</label>
+                                    <select id="fact-product" required></select>
+                                </div>
+                                <div class="form-group" style="max-width: 110px;">
+                                    <label>Cant.</label>
+                                    <input type="number" id="fact-qty" value="1" min="1" required>
+                                </div>
+                            </div>
+
+                            <!-- Desglose automático -->
+                            <div class="billing-summary-box">
+                                <div class="billing-row">
+                                    <span>Subtotal Neto Gravado:</span>
+                                    <strong id="fact-subtotal">$0</strong>
+                                </div>
+                                <div class="billing-row" id="fact-iva-row">
+                                    <span>IVA (21% Discriminado):</span>
+                                    <strong id="fact-iva">$0</strong>
+                                </div>
+                                <div class="billing-row total">
+                                    <strong>Total a Facturar:</strong>
+                                    <strong id="fact-total" style="color:var(--accent-sage-dark);">$0</strong>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-primary full-width">Emitir e Imprimir Comprobante</button>
+                        </form>
+                    </div>
+
+                    <!-- Tabla de Facturas Emitidas -->
+                    <div class="inventory-box">
+                        <div class="inventory-header">
+                            <div>
+                                <h2>Libro de Facturas Emitidas (IVA Ventas)</h2>
+                                <p class="sub-text">Hacé clic en "Ver / PDF" para abrir o imprimir cualquier factura generada.</p>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="inventory-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Comprobante</th>
+                                        <th>Cliente & CUIT</th>
+                                        <th>Neto / IVA</th>
+                                        <th>Total</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="emitted-invoices-tbody">
+                                    <!-- Dinámico JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-PESTAÑA 4: HISTORIAL DE VENTAS Y CAJA -->
             <div id="tab-sales" class="admin-tab-content">
                 <div class="inventory-box">
                     <div class="inventory-header">
                         <div>
-                            <h2>Registro de Ventas y Pedidos</h2>
-                            <p class="sub-text">Incluye pedidos entrantes por WhatsApp y ventas cobradas en local.</p>
+                            <h2>Registro General de Ventas y Caja</h2>
+                            <p class="sub-text">Incluye pedidos por WhatsApp, ventas de mostrador y facturas emitidas.</p>
                         </div>
                         <button id="btn-export-csv" class="btn-outline-sm">📥 Exportar Planilla (CSV)</button>
                     </div>
@@ -278,12 +469,12 @@
                 </div>
             </div>
 
-            <!-- SUB-PESTAÑA 4: CARGA DE FACTURAS Y PROVEEDORES -->
+            <!-- SUB-PESTAÑA 5: CARGA DE FACTURAS DE COMPRA Y GASTOS -->
             <div id="tab-invoices" class="admin-tab-content">
                 <div class="invoices-layout">
                     <div class="invoice-form-card">
-                        <h3>🧾 Cargar Factura o Gasto</h3>
-                        <p class="sub-text">Registrá boletas de proveedores, luz, alquiler o insumos con su comprobante.</p>
+                        <h3>🧾 Cargar Gasto o Factura de Proveedor</h3>
+                        <p class="sub-text">Registrá boletas de compra de mercadería, luz, alquiler o insumos con su foto.</p>
                         <form id="form-new-invoice">
                             <div class="form-group">
                                 <label>Proveedor o Concepto</label>
@@ -293,8 +484,8 @@
                                 <div class="form-group">
                                     <label>Tipo de Comprobante</label>
                                     <select id="inv-type">
-                                        <option value="Factura A">Factura A (Proveedor)</option>
-                                        <option value="Factura B/C">Factura B / C</option>
+                                        <option value="Factura A Compra">Factura A (Proveedor)</option>
+                                        <option value="Factura B/C Compra">Factura B / C</option>
                                         <option value="Servicio / Alquiler">Servicio / Gasto Fijo</option>
                                         <option value="Remito">Remito Mercadería</option>
                                     </select>
@@ -311,13 +502,13 @@
                                 </label>
                                 <input type="file" id="inv-file" accept="image/*" hidden>
                             </div>
-                            <button type="submit" class="btn-primary full-width">Registrar Factura</button>
+                            <button type="submit" class="btn-primary full-width">Registrar Gasto</button>
                         </form>
                     </div>
 
                     <div class="inventory-box">
                         <div class="inventory-header">
-                            <h2>Historial de Facturas Cargadas</h2>
+                            <h2>Historial de Gastos y Proveedores</h2>
                             <strong id="total-invoices-badge" class="expense-total">Total Gastos: $0</strong>
                         </div>
                         <div class="table-responsive">
@@ -341,7 +532,7 @@
                 </div>
             </div>
 
-            <!-- SUB-PESTAÑA 5: ENLACE PÁGINA CLIENTE & CONFIGURACIÓN DEL NEGOCIO -->
+            <!-- SUB-PESTAÑA 6: ENLACE PÁGINA CLIENTE & CONFIGURACIÓN DEL NEGOCIO -->
             <div id="tab-sync" class="admin-tab-content">
                 <div class="sync-grid">
                     <div class="sync-card">
@@ -352,12 +543,12 @@
                             <input type="text" id="client-url-display" readonly>
                             <button id="btn-copy-client-url" class="btn-primary">Copiar Link</button>
                         </div>
-                        <small class="hint-text">💡 <strong>Prueba en vivo:</strong> Abrí ese link en otra ventana. Cualquier cambio de precio o stock que hagas acá se actualiza en vivo en la pantalla del cliente.</small>
+                        <small class="hint-text">💡 <strong>Prueba en vivo:</strong> Abrí ese link en otra pestaña. Cualquier cambio de precio o stock que hagas acá se actualiza al instante en la pantalla del cliente.</small>
 
                         <hr class="divider">
 
                         <h4>Respaldo y Sincronización de Datos (JSON)</h4>
-                        <p>Exportá o importá toda la base de datos del comercio o conectala a un endpoint Cloud (Firebase / Supabase).</p>
+                        <p>Exportá o importá toda la base de datos del comercio o conectala a un endpoint Cloud.</p>
                         <div class="backup-actions">
                             <button id="btn-download-db" class="btn-outline">⬇️ Descargar Base de Datos</button>
                             <label for="input-upload-db" class="btn-outline" style="cursor:pointer;">⬆️ Importar Base (.json)</label>
@@ -366,15 +557,27 @@
                     </div>
 
                     <div class="sync-card">
-                        <h3>⚙️ Configuración del Comercio</h3>
+                        <h3>⚙️ Configuración y Seguridad del Comercio</h3>
                         <form id="form-store-config">
-                            <div class="form-group">
-                                <label>Nombre del Local (Se muestra en el Catálogo)</label>
-                                <input type="text" id="cfg-name" required placeholder="Ej: ProyectoDev Deco">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nombre del Local</label>
+                                    <input type="text" id="cfg-name" required placeholder="Ej: ProyectoDev Deco">
+                                </div>
+                                <div class="form-group">
+                                    <label>CUIT del Emisor (Para Facturas)</label>
+                                    <input type="text" id="cfg-cuit" required placeholder="Ej: 20-38123456-7">
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>WhatsApp de Recepción de Pedidos (Con cód. país)</label>
-                                <input type="text" id="cfg-phone" required placeholder="Ej: 5492494000000">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>WhatsApp de Pedidos (Cód. país)</label>
+                                    <input type="text" id="cfg-phone" required placeholder="Ej: 5492494000000">
+                                </div>
+                                <div class="form-group">
+                                    <label>Contraseña del Administrador</label>
+                                    <input type="text" id="cfg-pass" required placeholder="Ej: admin123">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>Endpoint Cloud / API URL (Opcional para producción)</label>
@@ -528,7 +731,7 @@
         </div>
     </div>
 
-    <!-- Modal 3: Visor de Foto de Factura -->
+    <!-- Modal 3: Visor de Foto de Factura de Proveedor -->
     <div id="receipt-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -543,7 +746,7 @@
     <div id="toast" class="toast">Cambios guardados</div>
 
     <footer class="footer">
-        <p>Desarrollado por <strong>ProyectoDev</strong> — Sistema de Stock, Finanzas y Pedidos por WhatsApp.</p>
+        <p>Desarrollado por <strong>ProyectoDev</strong> — Sistema de Stock, Facturación AFIP y Pedidos por WhatsApp.</p>
     </footer>
 
     <script src="app.js"></script>
