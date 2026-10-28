@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProyectoDev — Catálogo & Sistema de Gestión</title>
+    <!-- Google Fonts: Lora (Serif estética) y Plus Jakarta Sans (UI limpia) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Barra Superior de Navegación -->
+    <header class="navbar">
+        <div class="container nav-content">
+            <a href="#" class="brand" id="brand-link">
+                <!-- Logo SVG Estético ProyectoDev -->
+                <svg class="brand-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="40" height="40" rx="10" fill="#6E7E6F" fill-opacity="0.14"/>
+                    <path d="M14 15L9 20L14 25" stroke="#6E7E6F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M26 15L31 20L26 25" stroke="#6E7E6F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M22 12C17.5 15.5 16.5 22 20 28C23.5 22 22.5 15.5 22 12Z" fill="#6E7E6F"/>
+                </svg>
+                <div class="brand-text">
+                    <span class="brand-name" id="ui-store-name">Proyecto<span class="accent">Dev</span></span>
+                    <span class="brand-tag" id="ui-store-tag">Sistema Comercial</span>
+                </div>
+            </a>
+
+            <!-- Selector de Modo (Se oculta automáticamente si el link es ?modo=tienda para el cliente final) -->
+            <div class="mode-switcher" id="mode-switcher">
+                <button id="btn-view-catalog" class="mode-btn active">
+                    Vista Cliente
+                </button>
+                <button id="btn-view-admin" class="mode-btn">
+                    Menú Administración
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Cabecera Principal / Hero (SOLO VISIBLE EN VISTA CLIENTE) -->
+    <section id="client-hero" class="hero">
+        <div class="container">
+            <h1>La manera más simple de <span class="serif-italic">digitalizar tu negocio.</span></h1>
+            <p>Explorá nuestro catálogo actualizado en tiempo real y enviá tu pedido directo a nuestro WhatsApp.</p>
+        </div>
+    </section>
+
+    <main class="container main-content">
+        
+        <!-- ==================== VISTA 1: CATÁLOGO CLIENTE ==================== -->
+        <section id="catalog-view" class="view-section active">
+            <!-- Controles: Buscador y Filtros del Cliente -->
+            <div class="toolbar">
+                <div class="search-wrapper">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Buscar producto en el catálogo...">
+                </div>
+
+                <div class="categories" id="category-filters">
+                    <button class="cat-btn active" data-category="all">Todos</button>
+                    <button class="cat-btn" data-category="Cerámica">Cerámica</button>
+                    <button class="cat-btn" data-category="Deco">Deco & Hogar</button>
+                    <button class="cat-btn" data-category="Textil">Textil</button>
+                </div>
+            </div>
+
+            <div id="products-grid" class="products-grid">
+                <!-- Se llena dinámicamente con JS -->
+            </div>
+        </section>
+
+        <!-- ==================== VISTA 2: MENÚ ADMINISTRACIÓN (DUEÑO) ==================== -->
+        <section id="admin-view" class="view-section">
+            
+            <!-- Encabezado del Panel Dueño -->
+            <div class="admin-top-bar">
+                <div>
+                    <span class="admin-badge">Panel de Control</span>
+                    <h2 class="admin-title">Menú Administración</h2>
+                </div>
+                <div class="admin-quick-actions">
+                    <button id="btn-open-client-link" class="btn-outline" title="Abre la página exclusiva que verán tus clientes">
+                        🔗 Abrir Página Cliente
+                    </button>
+                    <button id="btn-open-pos" class="btn-outline">
+                        ⚡ Registrar Venta Rápida
+                    </button>
+                    <button id="btn-open-modal" class="btn-primary">
+                        + Nuevo Producto
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navegación Interna del Menú Administración -->
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="tab-dashboard">📊 Resumen & Gráficos</button>
+                <button class="admin-tab" data-tab="tab-inventory">📦 Stock & Precios Masivos</button>
+                <button class="admin-tab" data-tab="tab-sales">💰 Ventas & Caja</button>
+                <button class="admin-tab" data-tab="tab-invoices">🧾 Facturas & Gastos</button>
+                <button class="admin-tab" data-tab="tab-sync">🌐 Enlace Cliente & Config</button>
+            </div>
+
+            <!-- SUB-PESTAÑA 1: DASHBOARD, CAPITAL Y GRÁFICOS -->
+            <div id="tab-dashboard" class="admin-tab-content active">
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <span class="kpi-label">Capital en Mercadería (Costo)</span>
+                        <strong class="kpi-value" id="kpi-capital-cost">$0</strong>
+                        <small class="kpi-sub" id="kpi-capital-sale">Valor de venta: $0</small>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-label">Ventas Totales (Facturación)</span>
+                        <strong class="kpi-value sage" id="kpi-total-sales">$0</strong>
+                        <small class="kpi-sub" id="kpi-sales-count">0 operaciones registradas</small>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-label">Ganancia Neta Estimada</span>
+                        <strong class="kpi-value" id="kpi-net-profit">$0</strong>
+                        <small class="kpi-sub">Descontando costo y facturas</small>
+                    </div>
+                    <div class="kpi-card warning">
+                        <span class="kpi-label">Alertas de Reposición</span>
+                        <strong class="kpi-value" id="kpi-low-stock">0</strong>
+                        <small class="kpi-sub">Productos con stock crítico (≤ 3)</small>
+                    </div>
+                </div>
+
+                <!-- Gráficos Visuales (Estilo idéntico al celular de la placa) -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h3>Evolución de Ingresos (Últimos 7 días)</h3>
+                                <p>Facturación diaria por WhatsApp y Mostrador</p>
+                            </div>
+                            <span class="chart-pill">Tiempo Real</span>
+                        </div>
+                        <div id="bar-chart-container" class="bar-chart-container">
+                            <!-- Barras dinámicas JS -->
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h3>Balance & Rentabilidad</h3>
+                                <p>Distribución de ingresos, costos y gastos</p>
+                            </div>
+                        </div>
+                        <div class="donut-layout">
+                            <div class="donut-ring" id="profit-donut">
+                                <div class="donut-hole">
+                                    <span id="donut-margin-pct">0%</span>
+                                    <small>Margen</small>
+                                </div>
+                            </div>
+                            <div class="donut-legend">
+                                <div class="legend-item">
+                                    <span class="dot sage"></span>
+                                    <div>
+                                        <strong>Ganancia Limpia</strong>
+                                        <span id="legend-profit">$0</span>
+                                    </div>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="dot sand"></span>
+                                    <div>
+                                        <strong>Costo Mercadería</strong>
+                                        <span id="legend-cost">$0</span>
+                                    </div>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="dot terracotta"></span>
+                                    <div>
+                                        <strong>Facturas / Gastos</strong>
+                                        <span id="legend-expenses">$0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Automatización: Lista inteligente de reposición -->
+                <div class="automation-banner">
+                    <div>
+                        <h4>🤖 Asistente de Reposición Automática</h4>
+                        <p id="restock-summary-text">Analizando niveles de inventario...</p>
+                    </div>
+                    <button id="btn-copy-restock" class="btn-outline-sm">📋 Copiar Pedido para Proveedor</button>
+                </div>
+            </div>
+
+            <!-- SUB-PESTAÑA 2: INVENTARIO + AUTOMATIZACIÓN DE PRECIOS -->
+            <div id="tab-inventory" class="admin-tab-content">
+                <!-- Automatización de Precios por Inflación -->
+                <div class="bulk-tool-card">
+                    <div class="bulk-info">
+                        <h4>⚡ Actualizador Masivo de Precios</h4>
+                        <p>Ajustá tus precios por inflación o nuevo listado de proveedor en 1 clic (redondea automáticamente).</p>
+                    </div>
+                    <form id="form-bulk-price" class="bulk-controls">
+                        <select id="bulk-category">
+                            <option value="all">Todo el inventario</option>
+                            <option value="Cerámica">Solo Cerámica</option>
+                            <option value="Deco">Solo Deco & Hogar</option>
+                            <option value="Textil">Solo Textil</option>
+                        </select>
+                        <div class="bulk-input-group">
+                            <input type="number" id="bulk-percent" placeholder="Ej: 10" required step="any">
+                            <span>%</span>
+                        </div>
+                        <button type="submit" class="btn-primary">Aplicar Aumento</button>
+                    </form>
+                </div>
+
+                <div class="inventory-box">
+                    <div class="inventory-header">
+                        <div class="inv-search-wrap">
+                            <input type="text" id="admin-search-input" placeholder="Filtrar producto en inventario...">
+                        </div>
+                        <button id="btn-reset-demo" class="btn-outline-sm">Restaurar Demo</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Categoría</th>
+                                    <th>Costo u.</th>
+                                    <th>Precio Venta</th>
+                                    <th>Margen</th>
+                                    <th>Stock</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-tbody">
+                                <!-- Dinámico JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-PESTAÑA 3: HISTORIAL DE VENTAS Y CAJA -->
+            <div id="tab-sales" class="admin-tab-content">
+                <div class="inventory-box">
+                    <div class="inventory-header">
+                        <div>
+                            <h2>Registro de Ventas y Pedidos</h2>
+                            <p class="sub-text">Incluye pedidos entrantes por WhatsApp y ventas cobradas en local.</p>
+                        </div>
+                        <button id="btn-export-csv" class="btn-outline-sm">📥 Exportar Planilla (CSV)</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha / Hora</th>
+                                    <th>Cliente / Canal</th>
+                                    <th>Detalle de Productos</th>
+                                    <th>Total Venta</th>
+                                    <th>Ganancia Neta</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sales-tbody">
+                                <!-- Dinámico JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-PESTAÑA 4: CARGA DE FACTURAS Y PROVEEDORES -->
+            <div id="tab-invoices" class="admin-tab-content">
+                <div class="invoices-layout">
+                    <div class="invoice-form-card">
+                        <h3>🧾 Cargar Factura o Gasto</h3>
+                        <p class="sub-text">Registrá boletas de proveedores, luz, alquiler o insumos con su comprobante.</p>
+                        <form id="form-new-invoice">
+                            <div class="form-group">
+                                <label>Proveedor o Concepto</label>
+                                <input type="text" id="inv-provider" required placeholder="Ej: Mayorista Cerámico Sur / Luz">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Tipo de Comprobante</label>
+                                    <select id="inv-type">
+                                        <option value="Factura A">Factura A (Proveedor)</option>
+                                        <option value="Factura B/C">Factura B / C</option>
+                                        <option value="Servicio / Alquiler">Servicio / Gasto Fijo</option>
+                                        <option value="Remito">Remito Mercadería</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Monto Total ($ ARS)</label>
+                                    <input type="number" id="inv-amount" required min="1" placeholder="85000">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Adjuntar Foto de Factura / Ticket (Opcional)</label>
+                                <label for="inv-file" class="file-upload-label">
+                                    <span id="inv-file-label">📸 Subir foto del comprobante</span>
+                                </label>
+                                <input type="file" id="inv-file" accept="image/*" hidden>
+                            </div>
+                            <button type="submit" class="btn-primary full-width">Registrar Factura</button>
+                        </form>
+                    </div>
+
+                    <div class="inventory-box">
+                        <div class="inventory-header">
+                            <h2>Historial de Facturas Cargadas</h2>
+                            <strong id="total-invoices-badge" class="expense-total">Total Gastos: $0</strong>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="inventory-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Proveedor / Concepto</th>
+                                        <th>Tipo</th>
+                                        <th>Monto</th>
+                                        <th>Comprobante</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoices-tbody">
+                                    <!-- Dinámico JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-PESTAÑA 5: ENLACE PÁGINA CLIENTE & CONFIGURACIÓN DEL NEGOCIO -->
+            <div id="tab-sync" class="admin-tab-content">
+                <div class="sync-grid">
+                    <div class="sync-card">
+                        <h3>🌐 Enlace Exclusivo para tus Clientes</h3>
+                        <p>Cuando instalás este sistema en tu negocio, vos manejás todo desde este <strong>Menú Administración</strong> y tus clientes entran a un enlace limpio donde <strong>solo ven el catálogo</strong>.</p>
+                        
+                        <div class="client-link-box">
+                            <input type="text" id="client-url-display" readonly>
+                            <button id="btn-copy-client-url" class="btn-primary">Copiar Link</button>
+                        </div>
+                        <small class="hint-text">💡 <strong>Prueba en vivo:</strong> Abrí ese link en otra ventana. Cualquier cambio de precio o stock que hagas acá se actualiza en vivo en la pantalla del cliente.</small>
+
+                        <hr class="divider">
+
+                        <h4>Respaldo y Sincronización de Datos (JSON)</h4>
+                        <p>Exportá o importá toda la base de datos del comercio o conectala a un endpoint Cloud (Firebase / Supabase).</p>
+                        <div class="backup-actions">
+                            <button id="btn-download-db" class="btn-outline">⬇️ Descargar Base de Datos</button>
+                            <label for="input-upload-db" class="btn-outline" style="cursor:pointer;">⬆️ Importar Base (.json)</label>
+                            <input type="file" id="input-upload-db" accept=".json" hidden>
+                        </div>
+                    </div>
+
+                    <div class="sync-card">
+                        <h3>⚙️ Configuración del Comercio</h3>
+                        <form id="form-store-config">
+                            <div class="form-group">
+                                <label>Nombre del Local (Se muestra en el Catálogo)</label>
+                                <input type="text" id="cfg-name" required placeholder="Ej: ProyectoDev Deco">
+                            </div>
+                            <div class="form-group">
+                                <label>WhatsApp de Recepción de Pedidos (Con cód. país)</label>
+                                <input type="text" id="cfg-phone" required placeholder="Ej: 5492494000000">
+                            </div>
+                            <div class="form-group">
+                                <label>Endpoint Cloud / API URL (Opcional para producción)</label>
+                                <input type="url" id="cfg-cloud" placeholder="https://tu-proyecto.firebaseio.com/store.json">
+                            </div>
+                            <button type="submit" class="btn-primary full-width">Guardar Configuración</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Botón Flotante del Carrito (Solo en Vista Cliente) -->
+    <button id="cart-fab" class="cart-fab">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+        <span>Ver Pedido</span>
+        <span id="cart-count" class="cart-badge">0</span>
+    </button>
+
+    <!-- Drawer Lateral del Carrito / Pedido por WhatsApp -->
+    <div id="cart-overlay" class="overlay"></div>
+    <aside id="cart-drawer" class="drawer">
+        <div class="drawer-header">
+            <h3>Tu Pedido</h3>
+            <button id="btn-close-cart" class="btn-icon">&times;</button>
+        </div>
+        <div id="cart-items" class="drawer-body">
+            <!-- Items del carrito -->
+        </div>
+        <div class="drawer-footer">
+            <div class="cart-total-row">
+                <span>Total a pagar:</span>
+                <strong id="cart-total-price">$0</strong>
+            </div>
+            <div class="customer-input">
+                <label for="customer-name">Tu nombre para preparar el pedido:</label>
+                <input type="text" id="customer-name" placeholder="Ej: Martín Gómez">
+            </div>
+            <button id="btn-send-whatsapp" class="btn-whatsapp">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                </svg>
+                Enviar pedido por WhatsApp
+            </button>
+        </div>
+    </aside>
+
+    <!-- Modal 1: Agregar Nuevo Producto (Con Costo + Subida de Archivo o URL) -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Agregar Nuevo Producto</h3>
+                <button id="btn-close-modal" class="btn-icon">&times;</button>
+            </div>
+            <form id="form-new-product">
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="prod-name" required placeholder="Ej: Lámpara de Lino Nórdica">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="prod-cat" required>
+                            <option value="Cerámica">Cerámica</option>
+                            <option value="Deco">Deco & Hogar</option>
+                            <option value="Textil">Textil</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Inicial</label>
+                        <input type="number" id="prod-stock" required min="0" placeholder="10">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Costo Unitario ($ ARS)</label>
+                        <input type="number" id="prod-cost" required min="1" placeholder="12000">
+                    </div>
+                    <div class="form-group">
+                        <label>Precio de Venta ($ ARS)</label>
+                        <input type="number" id="prod-price" required min="1" placeholder="24500">
+                    </div>
+                </div>
+
+                <!-- Carga de Imagen: Archivo local o URL -->
+                <div class="form-group">
+                    <label>Imagen del Producto</label>
+                    <div class="image-upload-box">
+                        <label for="prod-file" class="file-upload-label">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <span id="file-label-text">Subir foto desde mi dispositivo</span>
+                        </label>
+                        <input type="file" id="prod-file" accept="image/*" hidden>
+                        
+                        <div class="divider-text"><span>o pegar enlace</span></div>
+                        
+                        <input type="url" id="prod-img" placeholder="https://ejemplo.com/imagen.jpg">
+
+                        <!-- Vista previa en vivo -->
+                        <div id="img-preview-container" class="img-preview-container">
+                            <img id="img-preview" src="" alt="Vista previa">
+                            <button type="button" id="btn-remove-img" class="btn-remove-img" title="Quitar imagen">&times;</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary full-width">Guardar en Inventario</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Punto de Venta Rápido (POS Mostrador) -->
+    <div id="pos-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚡ Registrar Venta en Mostrador</h3>
+                <button id="btn-close-pos" class="btn-icon">&times;</button>
+            </div>
+            <form id="form-pos-sale">
+                <div class="form-group">
+                    <label>Seleccionar Producto</label>
+                    <select id="pos-product" required></select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cantidad</label>
+                        <input type="number" id="pos-qty" value="1" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Método de Pago</label>
+                        <select id="pos-method">
+                            <option value="Efectivo / Transferencia">Efectivo / Transferencia</option>
+                            <option value="Tarjeta / QR">Tarjeta / QR</option>
+                            <option value="WhatsApp Directo">WhatsApp Directo</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary full-width">Confirmar Venta y Descontar Stock</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 3: Visor de Foto de Factura -->
+    <div id="receipt-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="receipt-modal-title">Comprobante</h3>
+                <button id="btn-close-receipt" class="btn-icon">&times;</button>
+            </div>
+            <img id="receipt-modal-img" src="" alt="Comprobante" style="width:100%; border-radius:10px; max-height:70vh; object-fit:contain;">
+        </div>
+    </div>
+
+    <!-- Notificación Toast -->
+    <div id="toast" class="toast">Cambios guardados</div>
+
+    <footer class="footer">
+        <p>Desarrollado por <strong>ProyectoDev</strong> — Sistema de Stock, Finanzas y Pedidos por WhatsApp.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
