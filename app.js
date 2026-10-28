@@ -79,7 +79,7 @@ const INITIAL_INVOICES = [
 
 const INITIAL_CONFIG = {
     storeName: "ProyectoDev",
-    phone: "5491100000000",
+    phone: "2244424335",
     cloudUrl: ""
 };
 
